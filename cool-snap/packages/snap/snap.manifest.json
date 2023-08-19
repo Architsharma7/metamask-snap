@@ -19,6 +19,7 @@
   },
   "initialPermissions": {
     "snap_dialog": {},
+    "snap_manageState": {},
     "snap_getBip44Entropy": [
       {
         "coinType": 1

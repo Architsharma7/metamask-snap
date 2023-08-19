@@ -1,6 +1,11 @@
 import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { panel, text } from '@metamask/snaps-ui';
-import { createWallet, getStoredAddress, storeAddressOnSnap } from './utils';
+import {
+  createWallet,
+  createWalletViaBit32,
+  getStoredAddress,
+  storeAddressOnSnap,
+} from './utils';
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
  *
@@ -14,20 +19,8 @@ import { createWallet, getStoredAddress, storeAddressOnSnap } from './utils';
 export const onRpcRequest: OnRpcRequestHandler = ({ origin, request }) => {
   switch (request.method) {
     case 'hello':
-      // return snap.request({
-      //   method: 'snap_dialog',
-      //   params: {
-      //     type: 'confirmation',
-      //     content: panel([
-      //       text(`Hello, **${origin}**!`),
-      //       text('This custom confirmation is just for display purposes.'),
-      //       text(
-      //         'But you can edit the snap source code to make it do something, if you want to!',
-      //       ),
-      //     ]),
-      //   },
-      // });
       return createWallet();
+    // return createWalletViaBit32();
 
     case 'create-new-pair':
       return createWallet();

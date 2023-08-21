@@ -1,19 +1,20 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import styled from 'styled-components';
 import { MetamaskActions, MetaMaskContext } from '../hooks';
 import {
   connectSnap,
   getSnap,
-  sendHello,
+  // sendHello,
   shouldDisplayReconnectButton,
 } from '../utils';
 import {
   ConnectButton,
   InstallFlaskButton,
   ReconnectButton,
-  SendHelloButton,
+  // SendHelloButton,
   Card,
 } from '../components';
+import '../styles/global.css';
 
 const Container = styled.div`
   display: flex;
@@ -62,24 +63,24 @@ const CardContainer = styled.div`
   margin-top: 1.5rem;
 `;
 
-const Notice = styled.div`
-  background-color: ${({ theme }) => theme.colors.background.alternative};
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
-  color: ${({ theme }) => theme.colors.text.alternative};
-  border-radius: ${({ theme }) => theme.radii.default};
-  padding: 2.4rem;
-  margin-top: 2.4rem;
-  max-width: 60rem;
-  width: 100%;
+// const Notice = styled.div`
+//   background-color: ${({ theme }) => theme.colors.background.alternative};
+//   border: 1px solid ${({ theme }) => theme.colors.border.default};
+//   color: ${({ theme }) => theme.colors.text.alternative};
+//   border-radius: ${({ theme }) => theme.radii.default};
+//   padding: 2.4rem;
+//   margin-top: 2.4rem;
+//   max-width: 60rem;
+//   width: 100%;
 
-  & > * {
-    margin: 0;
-  }
-  ${({ theme }) => theme.mediaQueries.small} {
-    margin-top: 1.2rem;
-    padding: 1.6rem;
-  }
-`;
+//   & > * {
+//     margin: 0;
+//   }
+//   ${({ theme }) => theme.mediaQueries.small} {
+//     margin-top: 1.2rem;
+//     padding: 1.6rem;
+//   }
+// `;
 
 const ErrorMessage = styled.div`
   background-color: ${({ theme }) => theme.colors.error.muted};
@@ -99,8 +100,90 @@ const ErrorMessage = styled.div`
   }
 `;
 
+const Connect = styled.div`
+  display: flex;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  justify-content: center;
+  border-radius: 0.75rem;
+  border-width: 1px;
+  border-color: #000000;
+  width: 100vw;
+  background-color: #ffffff;
+  margin-top: 3rem;
+  align-items: center;
+  flex-direction: column;
+`;
+
+const Wrapper = styled.div`
+  width: 100vw;
+`;
+const Wrap2 = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+const Wrap3 = styled.div`
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  border-radius: 0.75rem;
+  border-width: 1px;
+  border-color: white;
+`;
+const Wrap4 = styled.div`
+  display: flex;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  flex-direction: column;
+`;
+const Boxes = styled.div`
+  display: flex;
+  padding-top: 0.5rem;
+  padding-bottom: 1.5rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 0.75rem;
+  border-width: 1px;
+  border-color: black;
+  background-color: #ffffff;
+  margin-left: 5rem;
+  margin-right: 5rem;
+  text-align: center;
+  width: 450px;
+  margin-bottom: 40px;
+`;
+
+const Button = styled.div`
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+  border-radius: 0.75rem;
+  border-width: 1px;
+  border-color: #4f46e5;
+  background-color: #4f46e5;
+  font-size: 2.25rem;
+  line-height: 1.75rem;
+  text-align: center;
+  color: white;
+  cursor: pointer;
+`;
+
+const Text = styled.p`
+  font-size: 3rem;
+  line-height: 2rem;
+  font-weight: 600;
+  color: #4338ca;
+`;
+
 const Index = () => {
   const [state, dispatch] = useContext(MetaMaskContext);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
 
   const handleConnectClick = async () => {
     try {
@@ -111,106 +194,114 @@ const Index = () => {
         type: MetamaskActions.SetInstalled,
         payload: installedSnap,
       });
+
+      await setIsConnected(true);
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });
     }
   };
 
-  const handleSendHelloClick = async () => {
-    try {
-      await sendHello();
-    } catch (e) {
-      console.error(e);
-      dispatch({ type: MetamaskActions.SetError, payload: e });
-    }
-  };
+  // const handleSendHelloClick = async () => {
+  //   try {
+  //     await sendHello();
+  //   } catch (e) {
+  //     console.error(e);
+  //     dispatch({ type: MetamaskActions.SetError, payload: e });
+  //   }
+  // };
 
   return (
     <Container>
-      <Heading>
-        Welcome to <Span>template-snap</Span>
-      </Heading>
-      <Subtitle>
+      {isConnected ? (
+        <Wrapper>
+          <Wrap2>
+            <Wrap3>
+              <Wrap4>
+                <Boxes>
+                  <p className="text">Rotate Keys</p>
+                  <Button>Rotate Keys</Button>
+                </Boxes>
+                <Boxes>
+                  <Text>Interact With Safe Account</Text>
+                  <p className="text1">
+                    Send a Transaction Using Your Safe Account
+                  </p>
+                  <p className="text1">Amount</p>
+                  <input type="text" className="input"></input>
+                  <Button>Send Transaction</Button>
+                </Boxes>
+                <Boxes>
+                  <p className="text">Safe Details</p>
+                  <p className="text2">Account Address</p>
+                  <p className="text1">hello</p>
+                  <p className="text2">Owners Address</p>
+                  <p className="text1">hello</p>
+                </Boxes>
+              </Wrap4>
+            </Wrap3>
+          </Wrap2>
+        </Wrapper>
+      ) : (
+        <div>
+          <Heading>
+            Welcome to <Span>Safe-Rotator</Span>
+          </Heading>
+          {/* <Subtitle>
         Get started by editing <code>src/index.ts</code>
-      </Subtitle>
-      <CardContainer>
-        {state.error && (
-          <ErrorMessage>
-            <b>An error happened:</b> {state.error.message}
-          </ErrorMessage>
-        )}
-        {!state.isFlask && (
-          <Card
-            content={{
-              title: 'Install',
-              description:
-                'Snaps is pre-release software only available in MetaMask Flask, a canary distribution for developers with access to upcoming features.',
-              button: <InstallFlaskButton />,
-            }}
-            fullWidth
-          />
-        )}
-        {!state.installedSnap && (
-          <Card
-            content={{
-              title: 'Connect',
-              description:
-                'Get started by connecting to and installing the example snap.',
-              button: (
+      </Subtitle> */}
+          <CardContainer>
+            {state.error && (
+              <ErrorMessage>
+                <b>An error happened:</b> {state.error.message}
+              </ErrorMessage>
+            )}
+            {!state.isFlask && (
+              <Card
+                content={{
+                  title: 'Install',
+                  description:
+                    'Snaps is pre-release software only available in MetaMask Flask, a canary distribution for developers with access to upcoming features.',
+                  button: <InstallFlaskButton />,
+                }}
+                fullWidth
+              />
+            )}
+            {!state.installedSnap && (
+              <Connect>
+                <p className="text">Welcome to Safe Rotator</p>
+                <p className="text1">
+                  Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+                  Aspernatur pariatur architecto consectetur cupiditate
+                  accusantium aliquid numquam earum ut aperiam nobis totam autem
+                  laudantium suscipit quod, inventore enim tenetur adipisci
+                  mollitia!
+                </p>
                 <ConnectButton
                   onClick={handleConnectClick}
                   disabled={!state.isFlask}
                 />
-              ),
-            }}
-            disabled={!state.isFlask}
-          />
-        )}
-        {shouldDisplayReconnectButton(state.installedSnap) && (
-          <Card
-            content={{
-              title: 'Reconnect',
-              description:
-                'While connected to a local running snap this button will always be displayed in order to update the snap if a change is made.',
-              button: (
-                <ReconnectButton
+              </Connect>
+            )}
+            {shouldDisplayReconnectButton(state.installedSnap) && (
+              <Connect>
+                <p className="text">Welcome to Safe Rotator</p>
+                <p className="text1">
+                  Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+                  Aspernatur pariatur architecto consectetur cupiditate
+                  accusantium aliquid numquam earum ut aperiam nobis totam autem
+                  laudantium suscipit quod, inventore enim tenetur adipisci
+                  mollitia!
+                </p>
+                <ConnectButton
                   onClick={handleConnectClick}
-                  disabled={!state.installedSnap}
+                  disabled={!state.isFlask}
                 />
-              ),
-            }}
-            disabled={!state.installedSnap}
-          />
-        )}
-        <Card
-          content={{
-            title: 'Send Hello message',
-            description:
-              'Display a custom message within a confirmation screen in MetaMask.',
-            button: (
-              <SendHelloButton
-                onClick={handleSendHelloClick}
-                disabled={!state.installedSnap}
-              />
-            ),
-          }}
-          disabled={!state.installedSnap}
-          fullWidth={
-            state.isFlask &&
-            Boolean(state.installedSnap) &&
-            !shouldDisplayReconnectButton(state.installedSnap)
-          }
-        />
-        <Notice>
-          <p>
-            Please note that the <b>snap.manifest.json</b> and{' '}
-            <b>package.json</b> must be located in the server root directory and
-            the bundle must be hosted at the location specified by the location
-            field.
-          </p>
-        </Notice>
-      </CardContainer>
+              </Connect>
+            )}
+          </CardContainer>
+        </div>
+      )}
     </Container>
   );
 };

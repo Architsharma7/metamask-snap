@@ -34,10 +34,15 @@ const Link = styled.a`
 
 const Button = styled.button`
   display: flex;
-  align-self: flex-start;
+  align-self: flex-center;
   align-items: center;
   justify-content: center;
   margin-top: auto;
+  border-radius: 0.75rem;
+  border-width: 2px;
+  padding-right: 10px;
+  padding-left: 10px;
+  border-color: #818cf8;
   ${({ theme }) => theme.mediaQueries.small} {
     width: 100%;
   }
@@ -45,6 +50,8 @@ const Button = styled.button`
 
 const ButtonText = styled.span`
   margin-left: 1rem;
+  color: black;
+  font-size: 1.5rem;
 `;
 
 const ConnectedContainer = styled.div`

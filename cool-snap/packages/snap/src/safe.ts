@@ -5,7 +5,14 @@ import { useState } from 'react';
 import Safe, { SafeFactory } from '@safe-global/protocol-kit';
 import { SafeAccountConfig } from '@safe-global/protocol-kit';
 import { SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types';
-import { OperationType } from '@safe-global/safe-core-sdk-types';
+import { GelatoRelayPack } from '@safe-global/relay-kit';
+import { getSafeContract } from '@safe-global/protocol-kit';
+import {
+  MetaTransactionData,
+  MetaTransactionOptions,
+  OperationType,
+  RelayTransaction,
+} from '@safe-global/safe-core-sdk-types';
 
 const txServiceUrl = 'https://safe-transaction-goerli.safe.global';
 const RPC_URL = 'https://eth-goerli.public.blastapi.io';

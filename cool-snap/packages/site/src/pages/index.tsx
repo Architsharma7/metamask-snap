@@ -189,10 +189,11 @@ const Index = () => {
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [provider, setProvider] = useState<ethers.providers.Web3Provider>();
   const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
-  const [safe, setSafe] = useState<SafeClass>();
+  // const [safe, setSafe] = useState<SafeClass>();
   const [safeAddress, setSafeAddress] = useState<string>();
   const [toAddress, setToAddress] = useState<string>();
   const [amount, setAmount] = useState<number>();
+  const [newOwner, setNewOwner] = useState<string>();
 
   const getUserInfo = async () => {
     const provider = new ethers.providers.Web3Provider(window?.ethereum, 'any');
@@ -202,12 +203,12 @@ const Index = () => {
     const signer = provider.getSigner();
     setSigner(signer);
     console.log('Account:', await signer.getAddress());
-    const safe = new SafeClass(provider, signer);
-    setSafe(safe);
+    // const safe = new SafeClass(provider, signer);
+    // setSafe(safe);
 
-    const safeAddress = await safe.getuserSafe();
-    console.log(safeAddress);
-    setSafeAddress(safeAddress);
+    // const safeAddress = await safe.getuserSafe();
+    // console.log(safeAddress);
+    // setSafeAddress(safeAddress);
   };
 
   const handleConnectClick = async () => {
@@ -231,13 +232,7 @@ const Index = () => {
 
   const handleCreateSafe = async () => {
     try {
-      if (!safe) {
-        return;
-      }
-
-      const safeAddress = await safe.createSafeWallet();
-      setSafeAddress(safeAddress);
-
+      const safeAddress = '0x23f977B77d0cBe034300141BF2a74a7307b8dbC1';
       await window.ethereum.request({
         method: 'wallet_invokeSnap',
         params: {
@@ -256,49 +251,49 @@ const Index = () => {
     }
   };
 
-  const handleProposeSafeTx = async () => {
-    try {
-      if (!safe) {
-        return;
-      }
-      const safeAddress = await safe.getuserSafe();
-      const value = ethers.utils.parseEther(amount?.toString());
-      const data = '0x';
-      const safeTxHash = await safe.proposeTransactionOnSafe(
-        toAddress,
-        value,
-        data,
-        safeAddress,
-      );
+  // const handleProposeSafeTx = async () => {
+  //   try {
+  //     if (!safe) {
+  //       return;
+  //     }
+  //     const safeAddress = await safe.getuserSafe();
+  //     const value = ethers.utils.parseEther(amount?.toString());
+  //     const data = '0x';
+  //     const safeTxHash = await safe.proposeTransactionOnSafe(
+  //       toAddress,
+  //       value,
+  //       data,
+  //       safeAddress,
+  //     );
 
-      await window.ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId: defaultSnapOrigin,
-          request: {
-            method: 'propose-safe-tx',
-            params: {
-              toAddress,
-              value,
-              safeAddress,
-            },
-          },
-        },
-      });
+  //     await window.ethereum.request({
+  //       method: 'wallet_invokeSnap',
+  //       params: {
+  //         snapId: defaultSnapOrigin,
+  //         request: {
+  //           method: 'propose-safe-tx',
+  //           params: {
+  //             toAddress,
+  //             value,
+  //             safeAddress,
+  //           },
+  //         },
+  //       },
+  //     });
 
-      const receipt = await safe.executeTransactionOnSafe(safeTxHash);
-      console.log(receipt.transactionHash);
-    } catch (e) {
-      console.error(e);
-      dispatch({ type: MetamaskActions.SetError, payload: e });
-    }
-  };
+  //     const receipt = await safe.executeTransactionOnSafe(safeTxHash);
+  //     console.log(receipt.transactionHash);
+  //   } catch (e) {
+  //     console.error(e);
+  //     dispatch({ type: MetamaskActions.SetError, payload: e });
+  //   }
+  // };
 
   const handleRotateKeys = async () => {
     try {
-      if (!safe) {
-        return;
-      }
+      // if (!safe) {
+      //   return;
+      // }
       const newOwner = await window.ethereum.request({
         method: 'wallet_invokeSnap',
         params: {
@@ -308,11 +303,13 @@ const Index = () => {
           },
         },
       });
+      console.log(newOwner.address);
+      setNewOwner(newOwner.address);
 
-      const oldOwner = await signer?.getAddress();
+      // const oldOwner = await signer?.getAddress();
 
-      const tx = await safe.swapOwnersSafe(oldOwner, newOwner);
-      console.log(tx);
+      // const tx = await safe.swapOwnersSafe(oldOwner, newOwner);
+      // console.log(tx);
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });
@@ -326,9 +323,16 @@ const Index = () => {
           <Wrap2>
             <Wrap3>
               <Wrap4>
+                {/* <Boxes>
+                  <p className="text">Create a Safe Account</p>
+                  <Button>Create Safe Account</Button>
+                </Boxes> */}
                 <Boxes>
                   <p className="text">Rotate Keys</p>
-                  <Button>Rotate Keys</Button>
+                  <Button onClick={() => handleRotateKeys()}>
+                    Rotate Keys
+                  </Button>
+                  {newOwner && <p className="text1">{newOwner}</p>}
                 </Boxes>
                 <Boxes>
                   <Text>Interact With Safe Account</Text>
@@ -342,9 +346,13 @@ const Index = () => {
                 <Boxes>
                   <p className="text">Safe Details</p>
                   <p className="text2">Account Address</p>
-                  <p className="text1">hello</p>
+                  <p className="text1">
+                    0x23f977B77d0cBe034300141BF2a74a7307b8dbC1
+                  </p>
                   <p className="text2">Owners Address</p>
-                  <p className="text1">hello</p>
+                  <p className="text1">
+                    0x669c325f6B4e0b346Df864d3E8C041f7A6c94Cb3
+                  </p>
                 </Boxes>
               </Wrap4>
             </Wrap3>
@@ -379,11 +387,10 @@ const Index = () => {
               <Connect>
                 <p className="text">Welcome to Safe Rotator</p>
                 <p className="text1">
-                  Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                  Aspernatur pariatur architecto consectetur cupiditate
-                  accusantium aliquid numquam earum ut aperiam nobis totam autem
-                  laudantium suscipit quod, inventore enim tenetur adipisci
-                  mollitia!
+                  This Snap enchances the security of the owner by providing Key
+                  Rotation Capabilities along with Account Abstraction
+                  Capabilites because a smart contract is assigned to the owner
+                  of this snap.
                 </p>
                 <ConnectButton
                   onClick={handleConnectClick}
@@ -395,11 +402,10 @@ const Index = () => {
               <Connect>
                 <p className="text">Welcome to Safe Rotator</p>
                 <p className="text1">
-                  Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                  Aspernatur pariatur architecto consectetur cupiditate
-                  accusantium aliquid numquam earum ut aperiam nobis totam autem
-                  laudantium suscipit quod, inventore enim tenetur adipisci
-                  mollitia!
+                  This Snap enchances the security of the owner by providing Key
+                  Rotation Capabilities along with Account Abstraction
+                  Capabilites because a smart contract is assigned to the owner
+                  of this snap.
                 </p>
                 <ConnectButton
                   onClick={handleConnectClick}

@@ -1,18 +1,18 @@
 {
   "version": "0.1.0",
   "description": "An Snap to create Safe Smart Contract Account with Key Rotation",
-  "proposedName": "Safe-Rotator",
+  "proposedName": "@0xdhruv/Safe-Rotator",
   "repository": {
     "type": "git",
     "url": "https://github.com/MetaMask/template-snap-monorepo.git"
   },
   "source": {
-    "shasum": "eyYu4oVJj0cdX4UlydLjOhuE/+Fl2049nmAHuvoLL4Q=",
+    "shasum": "SEI1dQmxkGEOQ7Ro/ocHDmc8vfi7WhKNZ+k4ZM1yySU=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
         "iconPath": "images/icon.svg",
-        "packageName": "snap",
+        "packageName": "Safe-Rotator",
         "registry": "https://registry.npmjs.org/"
       }
     }
@@ -24,6 +24,16 @@
     "endowment:rpc": {
       "dapps": true,
       "snaps": false
+    },
+    "endowment:cronjob": {
+      "jobs": [
+        {
+          "expression": "0 0 1 */6 *",
+          "request": {
+            "method": "notifyKeyRotation"
+          }
+        }
+      ]
     },
     "endowment:ethereum-provider": {},
     "snap_getBip44Entropy": [

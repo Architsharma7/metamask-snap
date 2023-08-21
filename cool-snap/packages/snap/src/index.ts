@@ -1,4 +1,4 @@
-import { OnRpcRequestHandler } from '@metamask/snaps-types';
+import { OnRpcRequestHandler, OnCronjobHandler } from '@metamask/snaps-types';
 import { createWallet, getStoredState, storeState } from './helpers';
 import { panel, text, heading, copyable, divider } from '@metamask/snaps-ui';
 import {
@@ -36,6 +36,22 @@ export const onRpcRequest: OnRpcRequestHandler = ({ origin, request }) => {
     //   return handleSignSafetx();
     // case 'change-owner-safe':
     //   return handleChangeSafeOwner();
+    default:
+      throw new Error('Method not found.');
+  }
+};
+
+export const onCronjob: OnCronjobHandler = async ({ request }) => {
+  switch (request.method) {
+    case 'notifyKeyRotation':
+      return snap.request({
+        method: 'snap_notify',
+        params: {
+          type: 'inApp',
+          message: `It's time to rotate your keys!!`,
+        },
+      });
+
     default:
       throw new Error('Method not found.');
   }

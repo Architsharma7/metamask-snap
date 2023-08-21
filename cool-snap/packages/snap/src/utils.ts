@@ -14,6 +14,7 @@ import {
   SLIP10Node,
 } from '@metamask/key-tree';
 import { createWallet, getStoredState, storeState } from './helpers';
+import { SafeClass } from './safe';
 
 // User has to select all the accounts they want to get
 // Or we have to maintain the local state of all new EOAs we have
@@ -71,13 +72,26 @@ export const handleCreateNewPair = async (address: `0x${string}`) => {
   };
 };
 
-export const handleCreateSafe = async () => {
+export const handleCreateSafe = async (provider: any, signer: any) => {
   // create the safe
+  const safe = new SafeClass(provider, signer);
+
+  const safeAddress = safe.createSafeWallet();
+
   // store the address
+  const storedData = getStoredState();
+  const newData = {
+    safeAddress: safeAddress,
+    newEOAs: storedData.newEOAs,
+  };
+
+  return safeAddress;
 };
 
 export const handleGetSafe = async () => {
   // get the state
+  const storedData = getStoredState();
+
   // extract Safe Address
 };
 

@@ -5,7 +5,14 @@ import { useState } from 'react';
 import Safe, { SafeFactory } from '@safe-global/protocol-kit';
 import { SafeAccountConfig } from '@safe-global/protocol-kit';
 import { SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types';
-import { OperationType } from '@safe-global/safe-core-sdk-types';
+import { GelatoRelayPack } from '@safe-global/relay-kit';
+import { getSafeContract } from '@safe-global/protocol-kit';
+import {
+  MetaTransactionData,
+  MetaTransactionOptions,
+  OperationType,
+  RelayTransaction,
+} from '@safe-global/safe-core-sdk-types';
 
 const txServiceUrl = 'https://safe-transaction-goerli.safe.global';
 const RPC_URL = 'https://eth-goerli.public.blastapi.io';
@@ -50,7 +57,7 @@ const initializeSafeSDK = async (safeAddress: any) => {
     ethAdapter,
     safeAddress,
   });
-
+  setSafeSDK(safeSDK);
   return safeSDK;
 };
 
@@ -113,7 +120,7 @@ export const proposeTransactionOnSafe = async (
   const safeTransactionData: SafeTransactionDataPartial = {
     to: destinationAddress,
     value: amount,
-    data: data,  // "0x"
+    data: data, // "0x"
     operation: OperationType.Call,
   };
 
@@ -160,3 +167,78 @@ export const getPendingTransactionsOnSafe = async () => {
   console.log(pendingTransactions);
   return pendingTransactions;
 };
+
+const GELATO_RELAY_API_KEY = process.env.NEXT_PUBLIC_GELATO_RELAY_API_KEY;
+const chainId = 5;
+const relayKit = new GelatoRelayPack(GELATO_RELAY_API_KEY!);
+const gasLimit = `100000`;
+const options: MetaTransactionOptions = {
+  gasLimit,
+  isSponsored: true,
+};
+
+export const prepareTransactionRelayerOnSafe = async (
+  destinationAddress: any,
+  amount: any,
+) => {
+  const safeTransactionData: MetaTransactionData = {
+    to: destinationAddress,
+    data: '0x',
+    value: amount,
+    operation: OperationType.Call,
+  };
+
+  const safeTransaction = await safeSDK.createTransaction({
+    safeTransactionData,
+  });
+
+  const signedSafeTx = await safeSDK.signTransaction(safeTransaction);
+  const safeSingletonContract = await getSafeContract({
+    ethAdapter,
+    safeVersion: await safeSDK.getContractVersion(),
+  });
+
+  const encodedTx = await safeSingletonContract.encode('execTransaction', [
+    signedSafeTx.data.to,
+    signedSafeTx.data.value,
+    signedSafeTx.data.data,
+    signedSafeTx.data.operation,
+    signedSafeTx.data.safeTxGas,
+    signedSafeTx.data.baseGas,
+    signedSafeTx.data.gasPrice,
+    signedSafeTx.data.gasToken,
+    signedSafeTx.data.refundReceiver,
+    signedSafeTx.encodedSignatures(),
+  ]);
+
+  return encodedTx;
+};
+
+export const executeTransactionRelayerSafe = async (safeAddress: any, encodedTx:any) => {
+  const relayTransaction: RelayTransaction =  {
+    target: safeAddress,
+    encodedTransaction: encodedTx,
+    chainId,
+    options,
+  };
+
+  const response = await relayKit.relayTransaction(relayTransaction);
+
+  console.log(
+    `Relay Transaction Task ID: https://relay.gelato.digital/tasks/status/${response.taskId}`,
+  );
+};
+
+export const executeTransactionSyncFeeSafe = async(targetAddress:any, encodedTx:any) => {
+  const relayKit = new GelatoRelayPack()
+  const relayTransaction =  {
+    target: targetAddress,
+    encodedTransaction: encodedTx,
+    chainId,
+    options
+  };
+  const response = await relayKit.relayTransaction(relayTransaction);
+  console.log(
+    `Relay Transaction Task ID: https://relay.gelato.digital/tasks/status/${response.taskId}`
+  );
+}

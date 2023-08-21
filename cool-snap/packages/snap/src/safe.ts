@@ -3,7 +3,7 @@ import { EthersAdapter } from '@safe-global/protocol-kit';
 import { ethers } from 'ethers';
 import { useState } from 'react';
 import Safe, { SafeFactory } from '@safe-global/protocol-kit';
-import { SafeAccountConfig } from '@safe-global/protocol-kit';
+import { SafeAccountConfig,SwapOwnerTxParams } from '@safe-global/protocol-kit';
 import { SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types';
 import { GelatoRelayPack } from '@safe-global/relay-kit';
 import { getSafeContract } from '@safe-global/protocol-kit';
@@ -269,5 +269,16 @@ export class SafeClass {
     console.log(
       `Relay Transaction Task ID: https://relay.gelato.digital/tasks/status/${response.taskId}`,
     );
+  }
+
+  async swapOwnersSafe(oldAddress: any, newAddress: any) {
+    const params: SwapOwnerTxParams = {
+      oldOwnerAddress: oldAddress,
+      newOwnerAddress: newAddress,
+    };
+    const safeTransaction = await safeSDK.createSwapOwnerTx(params);
+    const txResponse = await safeSDK.executeTransaction(safeTransaction);
+    await txResponse.transactionResponse?.wait();
+    console.log(txResponse);
   }
 }

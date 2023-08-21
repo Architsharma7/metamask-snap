@@ -1,7 +1,7 @@
 // Game Plan - Flow
 // Task 1 - User Installs the Snap to their wallet after connecting
 // Task 2 - Safe Account is created for the user inside Snap , and the owner is set to the current connected wallet
-// Task 3 - websites can requestTransaction to be sent , or signed via Snap
+// Task 3 - websites can requestTransaction to be sent , or signed via Snap (handeled by frontend)
 // Task 4 - Generate a new metamask address for the user
 // Task 5 - Add the address to thier wallet , meaning there is another acc for the user , showing them the dialog to add to the account
 // Task 6 - Change the Owner of the Safe
@@ -37,61 +37,103 @@ export const handleGetAllAddresses = async (): Promise<any> => {
 
 export const handleCreateNewPair = async () => {
   // get the connectedEOAs
-  // const acc = await ethereum.request({ method: 'eth_requestAccounts' });
-  // if (!acc) return;
-  // console.log(acc);
+  const acc = await ethereum.request({ method: 'eth_requestAccounts' });
+  if (!acc) return;
+  console.log(acc);
 
   // get Stored state
   const storedData = await getStoredState();
   // if (!storedData) return;
   console.log(storedData);
 
-  // // if (!Array.isArray(storedData?.newEOA)) return;
-
-  // const arr = acc.concat(storedData.newEOA);
-
-  // // find the index
-  // const totalWallets = arr.length;
-
-  // create new Pair
-  const newPair = await createWallet(1);
-  console.log(newPair);
-
-  // Store the new State
-  const newData = {
-    safeAddress: '',
-    newEOAs: [newPair.address],
-  };
+  if (!Array.isArray(storedData?.newEOA) && !Array.isArray(acc)) return;
   // console.log(newData);
 
-  await snap.request({
-    method: 'snap_dialog',
-    params: {
-      type: 'alert',
-      content: panel([
-        heading('Add new Account to Wallet?'),
-        text('Please ensure you dont share it with anybody else'),
-        text('Here is the new wallet address'),
-        copyable(`${newPair.address}`),
-        text(`Copy the private key below and Import this as a new account`),
-        copyable(`${newPair.privateKey}`),
-      ]),
-    },
-  });
+  if (storedData) {
+    const arr = [...acc, ...storedData.newEOA];
 
-  await storeState(newData);
+    // // find the index
+    const totalWallets = arr.length;
 
-  return {
-    privateKey: newPair.privateKey,
-    publicKey: newPair.address,
-  };
+    // create new Pair
+    const newPair = await createWallet(totalWallets);
+    console.log(newPair);
+
+    // Store the new State
+    let newData;
+
+    if (storedData.safeAddress) {
+      newData = {
+        safeAddress: storedData.safeAddress,
+        newEOAs: [...arr, newPair.address],
+      };
+    } else {
+      newData = {
+        safeAddress: '',
+        newEOAs: [...arr, newPair.address],
+      };
+    }
+
+    await snap.request({
+      method: 'snap_dialog',
+      params: {
+        type: 'alert',
+        content: panel([
+          heading('Add new Account to Wallet?'),
+          text('Please ensure you dont share it with anybody else'),
+          text('Here is the new wallet address'),
+          copyable(`${newPair.address}`),
+          text(`Copy the private key below and Import this as a new account`),
+          copyable(`${newPair.privateKey}`),
+        ]),
+      },
+    });
+    await storeState(newData);
+    return {
+      address: newPair.address,
+    };
+  } else {
+    const totalWallets = acc.length;
+
+    // create new Pair
+    const newPair = await createWallet(totalWallets);
+    console.log(newPair);
+
+    // Store the new State
+    const newData = {
+      safeAddress: '',
+      newEOAs: [newPair.address],
+    };
+
+    await snap.request({
+      method: 'snap_dialog',
+      params: {
+        type: 'alert',
+        content: panel([
+          heading('Add new Account to Wallet?'),
+          text('Please ensure you dont share it with anybody else'),
+          text('Here is the new wallet address'),
+          copyable(`${newPair.address}`),
+          text(`Copy the private key below and Import this as a new account`),
+          copyable(`${newPair.privateKey}`),
+        ]),
+      },
+    });
+    await storeState(newData);
+    return {
+      address: newPair.address,
+    };
+  }
 };
 
-export const handleCreateSafe = async (safeAddress: any) => {
+export const handleCreateSafe = async (params: any) => {
   // create the safe
   //   const safe = new SafeClass(provider, signer);
 
   //   const safeAddress = safe.createSafeWallet();
+
+  // Extract the safe address from the params;
+  const safeAddress = params.safeAddress;
 
   // store the address
   const storedData = getStoredState();
@@ -115,25 +157,7 @@ export const handleGetSafe = async () => {
   return storedData?.safeAddress;
 };
 
-export const handleSendSafetx = async () => {
-  // take the tx info
-  const storedData = await getStoredState();
-  if (!storedData) return;
-
-  const safeAddress = storedData.safeAddress;
-  // prepare and send
-  // const safe = new SafeClass(provider, signer);
-
-  // // Propose
-  // const txHash = await safe.proposeTransactionOnSafe(
-  //   destinationAddress,
-  //   amount,
-  //   data,
-  //   safeAddress,
-  // );
-
-  // give tx confirmation
-
+export const handleSendSafetx = async (params: any) => {
   await snap.request({
     method: 'snap_dialog',
     params: {
@@ -145,27 +169,9 @@ export const handleSendSafetx = async () => {
         ),
         divider(),
         text(
-          `The Transaction is sent to ${destinationAddress} from the Safe ${safeAddress}`,
+          `The Transaction is sent to ${params.toAddress} from the Safe ${params.safeAddress} for value ${params.value}`,
         ),
       ]),
     },
   });
-
-  // execute the tx on Safe
-  // const receipt = await safe.executeTransactionOnSafe(txHash);
-  // return receipt.transactionHash;
-
-  // confirm the tx
 };
-
-// export const handleSignSafetx = async () => {
-//   // take the tx info
-//   // prepare and sign
-//   return '';
-// };
-
-// export const handleChangeSafeOwner = async () => {
-//   // get new Owner & old Owner
-//   // do a change owner tx by the old Owner
-//   return '';
-// };

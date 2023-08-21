@@ -1,10 +1,11 @@
 import { useContext, useState } from 'react';
 import styled from 'styled-components';
 import { MetamaskActions, MetaMaskContext } from '../hooks';
+import { defaultSnapOrigin } from '../config';
 import {
   connectSnap,
   getSnap,
-  // sendHello,
+  sendHello,
   shouldDisplayReconnectButton,
 } from '../utils';
 import {
@@ -14,7 +15,9 @@ import {
   // SendHelloButton,
   Card,
 } from '../components';
+import { ethers } from 'ethers';
 import '../styles/global.css';
+import SafeClass from '../utils/safe';
 
 const Container = styled.div`
   display: flex;
@@ -184,6 +187,28 @@ const Text = styled.p`
 const Index = () => {
   const [state, dispatch] = useContext(MetaMaskContext);
   const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [provider, setProvider] = useState<ethers.providers.Web3Provider>();
+  const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
+  const [safe, setSafe] = useState<SafeClass>();
+  const [safeAddress, setSafeAddress] = useState<string>();
+  const [toAddress, setToAddress] = useState<string>();
+  const [amount, setAmount] = useState<number>();
+
+  const getUserInfo = async () => {
+    const provider = new ethers.providers.Web3Provider(window?.ethereum, 'any');
+    // Prompt user for account connections
+    await provider.send('eth_requestAccounts', []);
+    setProvider(provider);
+    const signer = provider.getSigner();
+    setSigner(signer);
+    console.log('Account:', await signer.getAddress());
+    const safe = new SafeClass(provider, signer);
+    setSafe(safe);
+
+    const safeAddress = await safe.getuserSafe();
+    console.log(safeAddress);
+    setSafeAddress(safeAddress);
+  };
 
   const handleConnectClick = async () => {
     try {
@@ -195,21 +220,104 @@ const Index = () => {
         payload: installedSnap,
       });
 
-      await setIsConnected(true);
+      await getUserInfo();
+
+      setIsConnected(true);
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });
     }
   };
 
-  // const handleSendHelloClick = async () => {
-  //   try {
-  //     await sendHello();
-  //   } catch (e) {
-  //     console.error(e);
-  //     dispatch({ type: MetamaskActions.SetError, payload: e });
-  //   }
-  // };
+  const handleCreateSafe = async () => {
+    try {
+      if (!safe) {
+        return;
+      }
+
+      const safeAddress = await safe.createSafeWallet();
+      setSafeAddress(safeAddress);
+
+      await window.ethereum.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId: defaultSnapOrigin,
+          request: {
+            method: 'create-safe',
+            params: {
+              safeAddress,
+            },
+          },
+        },
+      });
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+  };
+
+  const handleProposeSafeTx = async () => {
+    try {
+      if (!safe) {
+        return;
+      }
+      const safeAddress = await safe.getuserSafe();
+      const value = ethers.utils.parseEther(amount?.toString());
+      const data = '0x';
+      const safeTxHash = await safe.proposeTransactionOnSafe(
+        toAddress,
+        value,
+        data,
+        safeAddress,
+      );
+
+      await window.ethereum.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId: defaultSnapOrigin,
+          request: {
+            method: 'propose-safe-tx',
+            params: {
+              toAddress,
+              value,
+              safeAddress,
+            },
+          },
+        },
+      });
+
+      const receipt = await safe.executeTransactionOnSafe(safeTxHash);
+      console.log(receipt.transactionHash);
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+  };
+
+  const handleRotateKeys = async () => {
+    try {
+      if (!safe) {
+        return;
+      }
+      const newOwner = await window.ethereum.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId: defaultSnapOrigin,
+          request: {
+            method: 'create-new-pair',
+          },
+        },
+      });
+
+      const oldOwner = await signer?.getAddress();
+
+      const tx = await safe.swapOwnersSafe(oldOwner, newOwner);
+      console.log(tx);
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+  };
 
   return (
     <Container>

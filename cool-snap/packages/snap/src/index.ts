@@ -1,7 +1,12 @@
 import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { createWallet, getStoredState, storeState } from './helpers';
 import { panel, text, heading, copyable, divider } from '@metamask/snaps-ui';
-import { handleCreateSafe } from './utils';
+import {
+  handleCreateNewPair,
+  handleCreateSafe,
+  handleGetAllAddresses,
+  handleGetSafe,
+} from './utils';
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -15,16 +20,16 @@ import { handleCreateSafe } from './utils';
  */
 export const onRpcRequest: OnRpcRequestHandler = ({ origin, request }) => {
   switch (request.method) {
-    case 'hello':
-      return handleCreateSafe();
-    // case 'get-addresses':
+    // case 'hello':
     //   return handleGetAllAddresses();
-    // case 'create-new-pair':
-    //   return handleCreateNewPair();
-    // case 'create-safe':
-    //   return handleCreateSafe();
-    // case 'get-safe':
-    //   return handleGetSafe();
+    case 'get-addresses':
+      return handleGetAllAddresses();
+    case 'create-new-pair':
+      return handleCreateNewPair();
+    case 'create-safe':
+      return handleCreateSafe(request.params);
+    case 'get-safe':
+      return handleGetSafe();
     // case 'send-transaction-safe':
     //   return handleSendSafetx();
     // case 'sign-transaction-safe':

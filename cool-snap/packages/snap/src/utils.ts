@@ -13,6 +13,7 @@ import {
   getBIP44AddressKeyDeriver,
   SLIP10Node,
 } from '@metamask/key-tree';
+import { createWallet, getStoredState, storeState } from './helpers';
 
 // User has to select all the accounts they want to get
 // Or we have to maintain the local state of all new EOAs we have
@@ -38,12 +39,36 @@ export const handleGetAllAddresses = async (): Promise<any> => {
   }
 };
 
-export const handleCreateNewPair = async () => {
+export const handleCreateNewPair = async (address: `0x${string}`) => {
   // get the connectedEOAs
+  const acc = await ethereum.request({ method: 'eth_requestAccounts' });
+  if (!acc) return;
+
   // get Stored state
+  const storedData = getStoredState();
+
+  if (!Array.isArray(storedData?.newEOA)) return;
+
+  const arr = acc.concat(storedData.newEOA);
+
   // find the index
+  const totalWallets = arr.length;
+
   // create new Pair
+  const newPair = await createWallet(totalWallets);
+
   // Store the new State
+  const newData = {
+    safeAddress: storedData.safeAddress,
+    newEOAs: [...storedData.newEOAs, newPair.publicKey],
+  };
+
+  await storeState(newData);
+
+  return {
+    privateKey: newPair.privateKey,
+    publicKey: newPair.address,
+  };
 };
 
 export const handleCreateSafe = async () => {

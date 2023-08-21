@@ -50,22 +50,27 @@ export const createWalletViaBit32 = async (addressIndex: number) => {
 
 // we can convert it to an address of safe addresses
 // We have to store the EOAs too
-export const storeAddressOnSnap = async (address: `0x${string}`) => {
+export const storeState = async (newData: {}) => {
   await snap.request({
     method: 'snap_manageState',
     params: {
       operation: 'update',
-      newState: { safeAddress: address },
+      newState: newData,
     },
   });
 };
 
 export const getStoredState = async () => {
+  // {
+  //   safeAddress: `0x${string}`;
+  //   newEOAs: `0x${string}`[];
+  // }
   const persistedData = await snap.request({
     method: 'snap_manageState',
     params: { operation: 'get' },
   });
 
   // console.log(persistedData);
+
   return persistedData;
 };

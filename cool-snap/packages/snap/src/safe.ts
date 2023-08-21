@@ -16,28 +16,8 @@ import {
 
 const txServiceUrl = 'https://safe-transaction-goerli.safe.global';
 const RPC_URL = 'https://eth-goerli.public.blastapi.io';
-const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
-const signer = new ethers.Wallet('config.SIGNER_ADDRESS_PRIVATE_KEY', provider);
-const [safeSDK, setSafeSDK] = useState<any>();
-const [safeAddress, setSafeAddress] = useState<any>();
-const [safeSetupComplete, setsafeSetupComplete] = useState<boolean>(false);
 
-// const ownerSigner = new ethers.Wallet(
-//   'process.env.OWNER_PRIVATE_KEY',
-//   provider,
-// );
-
-// const ethAdapter = new EthersAdapter({
-//   ethers,
-//   signerOrProvider: ownerSigner,
-// });
-
-// const safeService = new SafeApiKit({
-//   txServiceUrl,
-//   ethAdapter: ethAdapter,
-// });
-
-const GELATO_RELAY_API_KEY = process.env.NEXT_PUBLIC_GELATO_RELAY_API_KEY;
+const GELATO_RELAY_API_KEY = 'process.env.NEXT_PUBLIC_GELATO_RELAY_API_KEY';
 const chainId = 5;
 const gasLimit = `100000`;
 const options: MetaTransactionOptions = {
@@ -176,7 +156,7 @@ export default class SafeClass {
       safeAddress: await safe.getAddress(),
       safeTransactionData: safeTransaction.data,
       safeTxHash: safeTxHash,
-      senderAddress: await signer.getAddress(),
+      senderAddress: await this.signer.getAddress(),
       senderSignature: signature.data,
     });
 
@@ -203,7 +183,7 @@ export default class SafeClass {
 
   async getPendingTransactionsOnSafe() {
     const pendingTransactions = (
-      await this.safeService.getPendingTransactions(safeAddress)
+      await this.safeService.getPendingTransactions(this.safeAddress)
     ).results;
     console.log(pendingTransactions);
     return pendingTransactions;
@@ -217,15 +197,15 @@ export default class SafeClass {
       operation: OperationType.Call,
     };
 
-    const safeTransaction = await safeSDK.createTransaction({
+    const safeTransaction = await this.safeSDK.createTransaction({
       safeTransactionData,
     });
 
-    const signedSafeTx = await safeSDK.signTransaction(safeTransaction);
+    const signedSafeTx = await this.safeSDK.signTransaction(safeTransaction);
 
     const safeSingletonContract = await getSafeContract({
       ethAdapter: this.ethAdapter,
-      safeVersion: await safeSDK.getContractVersion(),
+      safeVersion: await this.safeSDK.getContractVersion(),
     });
 
     const encodedTx = await safeSingletonContract.encode('execTransaction', [

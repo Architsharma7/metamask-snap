@@ -7,15 +7,9 @@
 // Task 6 - Change the Owner of the Safe
 
 // A User can only have 1 Safe for now
-
-import {
-  BIP44Node,
-  getBIP44AddressKeyDeriver,
-  SLIP10Node,
-} from '@metamask/key-tree';
 import { panel, text, heading, copyable, divider } from '@metamask/snaps-ui';
 import { createWallet, getStoredState, storeState } from './helpers';
-import SafeClass from './safe';
+// import SafeClass from './safe';
 
 // User has to select all the accounts they want to get
 // Or we have to maintain the local state of all new EOAs we have
@@ -41,35 +35,39 @@ export const handleGetAllAddresses = async (): Promise<any> => {
   }
 };
 
-export const handleCreateNewPair = async (address: `0x${string}`) => {
+export const handleCreateNewPair = async () => {
   // get the connectedEOAs
-  const acc = await ethereum.request({ method: 'eth_requestAccounts' });
-  if (!acc) return;
+  // const acc = await ethereum.request({ method: 'eth_requestAccounts' });
+  // if (!acc) return;
+  // console.log(acc);
 
   // get Stored state
   const storedData = await getStoredState();
-  if (!storedData) return;
+  // if (!storedData) return;
+  console.log(storedData);
 
-  if (!Array.isArray(storedData?.newEOA)) return;
+  // // if (!Array.isArray(storedData?.newEOA)) return;
 
-  const arr = acc.concat(storedData.newEOA);
+  // const arr = acc.concat(storedData.newEOA);
 
-  // find the index
-  const totalWallets = arr.length;
+  // // find the index
+  // const totalWallets = arr.length;
 
   // create new Pair
-  const newPair = await createWallet(totalWallets);
+  const newPair = await createWallet(1);
+  console.log(newPair);
 
   // Store the new State
   const newData = {
-    safeAddress: storedData.safeAddress,
-    newEOAs: [...storedData.newEOAs, newPair.publicKey],
+    safeAddress: '',
+    newEOAs: [newPair.address],
   };
+  // console.log(newData);
 
   await snap.request({
     method: 'snap_dialog',
     params: {
-      type: 'confirmation',
+      type: 'alert',
       content: panel([
         heading('Add new Account to Wallet?'),
         text('Please ensure you dont share it with anybody else'),
@@ -89,20 +87,21 @@ export const handleCreateNewPair = async (address: `0x${string}`) => {
   };
 };
 
-export const handleCreateSafe = async (provider: any, signer: any) => {
+export const handleCreateSafe = async (safeAddress: any) => {
   // create the safe
-  const safe = new SafeClass(provider, signer);
+  //   const safe = new SafeClass(provider, signer);
 
-  const safeAddress = safe.createSafeWallet();
+  //   const safeAddress = safe.createSafeWallet();
 
   // store the address
   const storedData = getStoredState();
+
   const newData = {
     safeAddress: safeAddress,
     newEOAs: storedData.newEOAs,
   };
 
-  return safeAddress;
+  return 'safeAddress';
 };
 
 export const handleGetSafe = async () => {
@@ -116,28 +115,22 @@ export const handleGetSafe = async () => {
   return storedData?.safeAddress;
 };
 
-export const handleSendSafetx = async (
-  destinationAddress: any,
-  amount: any,
-  data: any,
-  provider: any,
-  signer: any,
-) => {
+export const handleSendSafetx = async () => {
   // take the tx info
   const storedData = await getStoredState();
   if (!storedData) return;
 
   const safeAddress = storedData.safeAddress;
   // prepare and send
-  const safe = new SafeClass(provider, signer);
+  // const safe = new SafeClass(provider, signer);
 
-  // Propose
-  const txHash = await safe.proposeTransactionOnSafe(
-    destinationAddress,
-    amount,
-    data,
-    safeAddress,
-  );
+  // // Propose
+  // const txHash = await safe.proposeTransactionOnSafe(
+  //   destinationAddress,
+  //   amount,
+  //   data,
+  //   safeAddress,
+  // );
 
   // give tx confirmation
 
@@ -159,16 +152,20 @@ export const handleSendSafetx = async (
   });
 
   // execute the tx on Safe
-  const receipt = await safe.executeTransactionOnSafe(txHash);
-  return receipt.transactionHash;
+  // const receipt = await safe.executeTransactionOnSafe(txHash);
+  // return receipt.transactionHash;
+
+  // confirm the tx
 };
 
-export const handleSignSafetx = async () => {
-  // take the tx info
-  // prepare and sign
-};
+// export const handleSignSafetx = async () => {
+//   // take the tx info
+//   // prepare and sign
+//   return '';
+// };
 
-export const handleChangeSafeOwner = async () => {
-  // get new Owner & old Owner
-  // do a change owner tx by the old Owner
-};
+// export const handleChangeSafeOwner = async () => {
+//   // get new Owner & old Owner
+//   // do a change owner tx by the old Owner
+//   return '';
+// };

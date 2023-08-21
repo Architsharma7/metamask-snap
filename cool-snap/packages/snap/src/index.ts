@@ -1,10 +1,13 @@
 import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { panel, text } from '@metamask/snaps-ui';
 import {
-  createWallet,
-  createWalletViaBit32,
-  getStoredAddress,
-  storeAddressOnSnap,
+  handleChangeSafeOwner,
+  handleCreateNewPair,
+  handleCreateSafe,
+  handleGetAllAddresses,
+  handleGetSafe,
+  handleSendSafetx,
+  handleSignSafetx,
 } from './utils';
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -19,15 +22,21 @@ import {
 export const onRpcRequest: OnRpcRequestHandler = ({ origin, request }) => {
   switch (request.method) {
     case 'hello':
-      return createWallet();
-    // return createWalletViaBit32();
-
+      return handleGetAllAddresses();
+    case 'get-addresses':
+      return handleGetAllAddresses();
     case 'create-new-pair':
-      return createWallet();
-    case 'store-safe':
-      return storeAddressOnSnap();
+      return handleCreateNewPair();
+    case 'create-safe':
+      return handleCreateSafe();
     case 'get-safe':
-      return getStoredAddress();
+      return handleGetSafe();
+    case 'send-transaction-safe':
+      return handleSendSafetx();
+    case 'sign-transaction-safe':
+      return handleSignSafetx();
+    case 'change-owner-safe':
+      return handleChangeSafeOwner();
     default:
       throw new Error('Method not found.');
   }

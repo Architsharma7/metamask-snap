@@ -45,7 +45,7 @@ const options: MetaTransactionOptions = {
   isSponsored: true,
 };
 
-export class SafeClass {
+export default class SafeClass {
   ethAdapter: any;
   safeService: any;
   safeSDK: any;
@@ -65,6 +65,7 @@ export class SafeClass {
 
   async initializeRelay() {
     const relayKit = new GelatoRelayPack(GELATO_RELAY_API_KEY!);
+    this.relayKit = relayKit;
   }
 
   async intializeSafeAPI(): Promise<SafeApiKit> {

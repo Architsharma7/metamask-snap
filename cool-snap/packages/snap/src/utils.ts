@@ -13,8 +13,9 @@ import {
   getBIP44AddressKeyDeriver,
   SLIP10Node,
 } from '@metamask/key-tree';
+import { panel, text, heading, copyable, divider } from '@metamask/snaps-ui';
 import { createWallet, getStoredState, storeState } from './helpers';
-import { SafeClass } from './safe';
+import SafeClass from './safe';
 
 // User has to select all the accounts they want to get
 // Or we have to maintain the local state of all new EOAs we have
@@ -46,7 +47,8 @@ export const handleCreateNewPair = async (address: `0x${string}`) => {
   if (!acc) return;
 
   // get Stored state
-  const storedData = getStoredState();
+  const storedData = await getStoredState();
+  if (!storedData) return;
 
   if (!Array.isArray(storedData?.newEOA)) return;
 
@@ -63,6 +65,21 @@ export const handleCreateNewPair = async (address: `0x${string}`) => {
     safeAddress: storedData.safeAddress,
     newEOAs: [...storedData.newEOAs, newPair.publicKey],
   };
+
+  await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: 'confirmation',
+      content: panel([
+        heading('Add new Account to Wallet?'),
+        text('Please ensure you dont share it with anybody else'),
+        text('Here is the new wallet address'),
+        copyable(`${newPair.address}`),
+        text(`Copy the private key below and Import this as a new account`),
+        copyable(`${newPair.privateKey}`),
+      ]),
+    },
+  });
 
   await storeState(newData);
 
@@ -90,14 +107,60 @@ export const handleCreateSafe = async (provider: any, signer: any) => {
 
 export const handleGetSafe = async () => {
   // get the state
-  const storedData = getStoredState();
+  const storedData = await getStoredState();
+  if (!storedData) return;
 
   // extract Safe Address
+  console.log(storedData?.safeAddress);
+
+  return storedData?.safeAddress;
 };
 
-export const handleSendSafetx = async () => {
+export const handleSendSafetx = async (
+  destinationAddress: any,
+  amount: any,
+  data: any,
+  provider: any,
+  signer: any,
+) => {
   // take the tx info
+  const storedData = await getStoredState();
+  if (!storedData) return;
+
+  const safeAddress = storedData.safeAddress;
   // prepare and send
+  const safe = new SafeClass(provider, signer);
+
+  // Propose
+  const txHash = await safe.proposeTransactionOnSafe(
+    destinationAddress,
+    amount,
+    data,
+    safeAddress,
+  );
+
+  // give tx confirmation
+
+  await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: 'confirmation',
+      content: panel([
+        heading('New Transaction to Safe ?'),
+        text(
+          'Would you like to propose transaction through your Safe Smart Contract Wallet',
+        ),
+        divider(),
+        text(
+          `The Transaction is sent to ${destinationAddress} from the Safe ${safeAddress}`,
+        ),
+      ]),
+    },
+  });
+
+  // execute the tx on Safe
+  const receipt = await safe.executeTransactionOnSafe(txHash);
+  return receipt.transactionHash;
 };
 
 export const handleSignSafetx = async () => {

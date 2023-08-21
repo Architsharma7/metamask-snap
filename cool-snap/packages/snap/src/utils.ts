@@ -46,113 +46,113 @@ export const handleCreateNewPair = async () => {
   // if (!storedData) return;
   console.log(storedData);
 
-  // create new Pair
-  const newPair = await createWallet(3);
-  console.log(newPair);
+  // // create new Pair
+  // const newPair = await createWallet(3);
+  // console.log(newPair);
 
-  // Store the new State
-  const newData = {
-    safeAddress: '',
-    newEOAs: [newPair.address],
-  };
+  // // Store the new State
+  // const newData = {
+  //   safeAddress: '',
+  //   newEOAs: [newPair.address],
+  // };
 
-  await snap.request({
-    method: 'snap_dialog',
-    params: {
-      type: 'alert',
-      content: panel([
-        heading('Add new Account to Wallet?'),
-        text('Please ensure you dont share it with anybody else'),
-        text('Here is the new wallet address'),
-        copyable(`${newPair.address}`),
-        text(`Copy the private key below and Import this as a new account`),
-        copyable(`${newPair.privateKey}`),
-      ]),
-    },
-  });
-  await storeState(newData);
-  return {
-    address: newPair.address,
-  };
+  // await snap.request({
+  //   method: 'snap_dialog',
+  //   params: {
+  //     type: 'alert',
+  //     content: panel([
+  //       heading('Add new Account to Wallet?'),
+  //       text('Please ensure you dont share it with anybody else'),
+  //       text('Here is the new wallet address'),
+  //       copyable(`${newPair.address}`),
+  //       text(`Copy the private key below and Import this as a new account`),
+  //       copyable(`${newPair.privateKey}`),
+  //     ]),
+  //   },
+  // });
+  // await storeState(newData);
+  // return {
+  //   address: newPair.address,
+  // };
 
-  // if (!Array.isArray(storedData?.newEOA) && !Array.isArray(acc)) return;
-  // console.log(newData);
+  if (!Array.isArray(storedData?.newEOA) && !Array.isArray(acc)) return;
+  console.log(newData);
 
-  // if (storedData) {
-  //   const arr = [...acc, ...storedData.newEOA];
+  if (storedData) {
+    const arr = [...acc, ...storedData.newEOA];
 
-  //   // // find the index
-  //   const totalWallets = arr.length;
+    // // find the index
+    const totalWallets = arr.length;
 
-  //   // create new Pair
-  //   const newPair = await createWallet(totalWallets);
-  //   console.log(newPair);
+    // create new Pair
+    const newPair = await createWallet(totalWallets);
+    console.log(newPair);
 
-  //   // Store the new State
-  //   let newData;
+    // Store the new State
+    let newData;
 
-  //   if (storedData.safeAddress) {
-  //     newData = {
-  //       safeAddress: storedData.safeAddress,
-  //       newEOAs: [...arr, newPair.address],
-  //     };
-  //   } else {
-  //     newData = {
-  //       safeAddress: '',
-  //       newEOAs: [...arr, newPair.address],
-  //     };
-  //   }
+    if (storedData.safeAddress) {
+      newData = {
+        safeAddress: storedData.safeAddress,
+        newEOAs: [...arr, newPair.address],
+      };
+    } else {
+      newData = {
+        safeAddress: '',
+        newEOAs: [...arr, newPair.address],
+      };
+    }
 
-  //   await snap.request({
-  //     method: 'snap_dialog',
-  //     params: {
-  //       type: 'alert',
-  //       content: panel([
-  //         heading('Add new Account to Wallet?'),
-  //         text('Please ensure you dont share it with anybody else'),
-  //         text('Here is the new wallet address'),
-  //         copyable(`${newPair.address}`),
-  //         text(`Copy the private key below and Import this as a new account`),
-  //         copyable(`${newPair.privateKey}`),
-  //       ]),
-  //     },
-  //   });
-  //   await storeState(newData);
-  //   return {
-  //     address: newPair.address,
-  //   };
-  // } else {
-  //   const totalWallets = acc.length;
+    await snap.request({
+      method: 'snap_dialog',
+      params: {
+        type: 'alert',
+        content: panel([
+          heading('Add new Account to Wallet?'),
+          text('Please ensure you dont share it with anybody else'),
+          text('Here is the new wallet address'),
+          copyable(`${newPair.address}`),
+          text(`Copy the private key below and Import this as a new account`),
+          copyable(`${newPair.privateKey}`),
+        ]),
+      },
+    });
+    await storeState(newData);
+    return {
+      address: newPair.address,
+    };
+  } else {
+    const totalWallets = acc.length;
 
-  //   // create new Pair
-  //   const newPair = await createWallet(totalWallets);
-  //   console.log(newPair);
+    // create new Pair
+    const newPair = await createWallet(totalWallets);
+    console.log(newPair);
 
-  //   // Store the new State
-  //   const newData = {
-  //     safeAddress: '',
-  //     newEOAs: [newPair.address],
-  //   };
+    // Store the new State
+    const newData = {
+      safeAddress: '',
+      newEOAs: [newPair.address],
+    };
 
-  //   await snap.request({
-  //     method: 'snap_dialog',
-  //     params: {
-  //       type: 'alert',
-  //       content: panel([
-  //         heading('Add new Account to Wallet?'),
-  //         text('Please ensure you dont share it with anybody else'),
-  //         text('Here is the new wallet address'),
-  //         copyable(`${newPair.address}`),
-  //         text(`Copy the private key below and Import this as a new account`),
-  //         copyable(`${newPair.privateKey}`),
-  //       ]),
-  //     },
-  //   });
-  //   await storeState(newData);
-  //   return {
-  //     address: newPair.address,
-  //   };
-  // }
+    await snap.request({
+      method: 'snap_dialog',
+      params: {
+        type: 'alert',
+        content: panel([
+          heading('Add new Account to Wallet?'),
+          text('Please ensure you dont share it with anybody else'),
+          text('Here is the new wallet address'),
+          copyable(`${newPair.address}`),
+          text(`Copy the private key below and Import this as a new account`),
+          copyable(`${newPair.privateKey}`),
+        ]),
+      },
+    });
+    await storeState(newData);
+    return {
+      address: newPair.address,
+    };
+  }
 };
 
 export const handleCreateSafe = async (params: any) => {

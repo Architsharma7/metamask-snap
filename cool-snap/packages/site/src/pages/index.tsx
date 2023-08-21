@@ -191,6 +191,7 @@ const Index = () => {
   const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
   // const [safe, setSafe] = useState<SafeClass>();
   const [safeAddress, setSafeAddress] = useState<string>();
+  const [userAddress, setUserAddress] = useState<string>();
   const [toAddress, setToAddress] = useState<string>();
   const [amount, setAmount] = useState<number>();
   const [newOwner, setNewOwner] = useState<string>();
@@ -203,6 +204,7 @@ const Index = () => {
     const signer = provider.getSigner();
     setSigner(signer);
     console.log('Account:', await signer.getAddress());
+    setUserAddress(await signer.getAddress());
     // const safe = new SafeClass(provider, signer);
     // setSafe(safe);
 
@@ -346,13 +348,9 @@ const Index = () => {
                 <Boxes>
                   <p className="text">Safe Details</p>
                   <p className="text2">Account Address</p>
-                  <p className="text1">
-                    0x23f977B77d0cBe034300141BF2a74a7307b8dbC1
-                  </p>
+                  <p className="text1">{safeAddress}</p>
                   <p className="text2">Owners Address</p>
-                  <p className="text1">
-                    0x669c325f6B4e0b346Df864d3E8C041f7A6c94Cb3
-                  </p>
+                  <p className="text1">{userAddress}</p>
                 </Boxes>
               </Wrap4>
             </Wrap3>
